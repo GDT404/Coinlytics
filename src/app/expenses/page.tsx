@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { createExpense, updateExpense, deleteExpense } from '@/services/expenses'
 import { Plus, Edit2, Trash2, X, Save, Wallet, TrendingUp, Calendar, Sparkles } from 'lucide-react'
+import { useBaseSalary } from '@/hooks/useBaseSalary'
+
 
 type Expense = {
   id: string
@@ -27,25 +29,13 @@ export default function ExpensesPage() {
   })
   const [formLoading, setFormLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [baseSalary, setBaseSalary] = useState<string>(() => {
-    // Salvar no localStorage para persistência simples
-    if (typeof window !== "undefined") {
-      return localStorage.getItem('baseSalary') || ''
-    }
-    return ''
-  })
+  const { baseSalary, setBaseSalary, loading: salaryLoading } = useBaseSalary()
   const [salaryEdit, setSalaryEdit] = useState(false)
+
 
   useEffect(() => {
     loadExpenses()
   }, [])
-
-  useEffect(() => {
-    // set baseSalary in localStorage every time it changes
-    if (typeof window !== "undefined") {
-      localStorage.setItem('baseSalary', baseSalary)
-    }
-  }, [baseSalary])
 
   async function loadExpenses() {
     const { data } = await supabase
@@ -127,7 +117,7 @@ export default function ExpensesPage() {
   const total = expenses.reduce((sum, item) => sum + item.amount, 0)
 
   // Cálculos relativos ao salário base
-  const baseSalaryNumber = Number(baseSalary) || 0
+  const baseSalaryNumber = baseSalary
   const percentUsed = baseSalaryNumber ? (total / baseSalaryNumber) * 100 : 0
   const lastMonth = new Date().getMonth()
   const thisYear = new Date().getFullYear()
@@ -177,8 +167,8 @@ export default function ExpensesPage() {
                 type="number"
                 min="0"
                 step="0.01"
-                value={baseSalary}
-                onChange={e => setBaseSalary(e.target.value)}
+                value={baseSalary || ''}
+                onChange={e => setBaseSalary(Number(e.target.value))}
                 className="bg-zinc-800 border border-zinc-600 px-4 py-2 rounded-lg outline-none focus:border-emerald-500"
                 placeholder="Informe seu salário base"
                 style={{ width: 140 }}
