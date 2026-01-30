@@ -2,76 +2,53 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import {
-  Home,
-  PlusCircle,
-  Lightbulb,
-  Settings,
-} from 'lucide-react'
-import clsx from 'clsx'
+import { Home, PlusCircle, Lightbulb, Settings } from 'lucide-react'
+import { Dock, DockIcon, DockItem, DockLabel } from '@/components/ui/dock'
+import { cn } from '@/lib/utils'
 
 const items = [
-  {
-    label: 'Dashboard',
-    href: '/dashboard',
-    icon: Home,
-  },
-  {
-    label: 'Gastos',
-    href: '/expenses',
-    icon: PlusCircle,
-  },
-  {
-    label: 'Insights',
-    href: '/tips',
-    icon: Lightbulb,
-  },
-  {
-    label: 'Configurações',
-    href: '/settings',
-    icon: Settings,
-  },
+  { label: 'Dashboard', href: '/dashboard', icon: Home },
+  { label: 'Gastos', href: '/expenses', icon: PlusCircle },
+  { label: 'Insights', href: '/tips', icon: Lightbulb },
+  { label: 'Configurações', href: '/settings', icon: Settings },
 ]
 
 export default function BottomNavigation() {
   const pathname = usePathname()
 
   return (
-    <nav className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl px-2 py-2 shadow-2xl flex items-center gap-1">
-        {items.map(item => {
+    // Centraliza o menu na parte inferior da tela
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
+      <Dock className="bg-zinc-900/90 border-zinc-800 backdrop-blur-md">
+        {items.map((item) => {
           const Icon = item.icon
-          const isActive = pathname === item.href || 
-            (item.href === '/dashboard' && pathname === '/dashboard') ||
-            (item.href === '/expenses' && (pathname === '/expenses' || pathname === '/expenses/new')) ||
-            (item.href === '/tips' && pathname === '/tips') ||
-            (item.href === '/settings' && pathname === '/settings')
+          const isActive = pathname === item.href
 
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={clsx(
-                'flex items-center justify-center w-12 h-12 rounded-full transition-all duration-200 relative',
-                isActive
-                  ? 'text-emerald-500'
-                  : 'text-zinc-400 hover:text-zinc-300'
-              )}
-            >
-              {isActive && (
-                <div className="absolute inset-0 rounded-full border-2 border-emerald-500 shadow-lg shadow-emerald-500/50 bg-emerald-500/10" />
-              )}
-              <Icon 
-                className={clsx(
-                  'w-6 h-6 relative z-10',
-                  isActive ? 'text-emerald-400' : 'text-zinc-400'
-                )} 
-                strokeWidth={isActive ? 2.5 : 2}
-              />
+            <Link key={item.href} href={item.href}>
+              <DockItem 
+                className={cn(
+                  "rounded-full transition-colors",
+                  isActive ? "bg-emerald-500/20" : "bg-zinc-800"
+                )}
+              >
+                {/* O texto que aparece quando você passa o mouse */}
+                <DockLabel>{item.label}</DockLabel>
+                
+                {/* O ícone que cresce e diminui */}
+                <DockIcon>
+                  <Icon 
+                    className={cn(
+                      "w-full h-full p-1",
+                      isActive ? "text-emerald-400" : "text-zinc-400"
+                    )} 
+                  />
+                </DockIcon>
+              </DockItem>
             </Link>
           )
         })}
-      </div>
-    </nav>
+      </Dock>
+    </div>
   )
 }
